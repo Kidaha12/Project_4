@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Breed Classifier</title>
+    <style>
+        #upload-container {
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 300px;
+            height: auto;
+        }
+    </style>
+</head>
+<body><center>
+    <h1>Dog Breed Classifier</h1>
+    <p><center>"Anything is paw-sible!"</center></p>
+
+    <div id="upload-container">
+        <button onclick="loadRandomImage()">Load Random Image</button>
+        <button onclick="classifyImage()">Classify Image</button>
+    </div>
+    <div id="result">
+        <img id="randomImage" src="" alt="Random Image">
+        <p id="prediction"></p>
+    </div>
+
+    <script>
+        let currentImagePath = '';
+
+        function loadRandomImage() {
+            fetch('/random-image')
+                .then(response => response.json())
+                .then(data => {
+                    const randomImage = document.getElementById('randomImage');
+                    randomImage.src = data.image_url;
+                    currentImagePath = data.image_url;
+                    document.getElementById('prediction').textContent = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function classifyImage() {
+            const predictionText = document.getElementById('prediction');
+
+            if (!currentImagePath) {
+                alert('Please load a random image first.');
+                return;
+            }
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image_path: currentImagePath })
+            })
+            .then(response => response.json())
+            .then(data => {
+                predictionText.textContent = `Predicted Breed: ${data.prediction}, Accuracy: ${data.accuracy}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body></center>
+</html>
